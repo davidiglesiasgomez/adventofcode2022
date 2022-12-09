@@ -18,7 +18,7 @@ $lines = explode("\n", $input);
 $lines = file('input.day9.txt');
 echo print_r($lines, true) . PHP_EOL;
 
-$day9Obj = new \AdventOfCode2022\Day9(0, 0, 0, 0);
+$day9Obj = new \AdventOfCode2022\Day9(1, 0, 0);
 
 foreach ($lines as $line) {
     if (preg_match('/([RULD]) ([0-9]+)/', $line, $matches)) {
@@ -27,10 +27,9 @@ foreach ($lines as $line) {
         for ($i=0; $i<$matches[2]; $i++) {
             // echo $matches[1] . PHP_EOL;
             $day9Obj->moverCabecera($matches[1]);
-            $day9Obj->moverCola();
         }
     }
 }
 
-echo 'Trail ' . print_r($day9Obj->getTailTrail(), true) . PHP_EOL;
-echo 'Count ' . $day9Obj->countDifferentTailTrail() . PHP_EOL;
+echo 'Trail ' . print_r($day9Obj->getElementPaths(1), true) . PHP_EOL;
+echo 'Count ' . $day9Obj->countDifferentElementPaths(1) . PHP_EOL;

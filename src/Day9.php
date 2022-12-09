@@ -4,112 +4,114 @@ namespace AdventOfCode2022;
 
 class Day9
 {
-    private $head = [null, null];
-    private $tail = [null, null];
-    private $trail = [];
+    private $elements = 0;
+    private $positions = [];
+    private $paths = [];
 
-    public function __construct(int $head_x=0, int $head_y=0, int $tail_x=0, int $tail_y=0)
+    public function __construct(int $elements=0, int $initial_x=0, int $initial_y=0)
     {
-        $this->head = [$head_x, $head_y];
-        $this->tail = [$tail_x, $tail_y];
-        $this->setTailTrail($this->tail);
-    }
-
-    public function getHeadPosition(): array
-    {
-        return $this->head;
-    }
-
-    public function getTailPosition(): array
-    {
-        return $this->tail;
-    }
-
-    public function moverCabecera(string $movimiento)
-    {
-        switch ($movimiento) {
-            case 'R':
-                $this->head = [$this->head[0]+1, $this->head[1]];
-                break;
-            case 'L':
-                $this->head = [$this->head[0]-1, $this->head[1]];
-                break;
-            case 'U':
-                $this->head = [$this->head[0], $this->head[1]+1];
-                break;
-            case 'D':
-                $this->head = [$this->head[0], $this->head[1]-1];
-                break;
+        $this->elements = $elements;
+        for ($i=0; $i<=$elements; $i++) {
+            $this->setElementPosition($i, $initial_x, $initial_y);
         }
     }
 
-    public function moverCola()
+    public function setElementPosition(int $element=0, int $x=0, int $y=0): void
     {
-        if ($this->head[0] == $this->tail[0] && $this->head[1] == $this->tail[1]) {
-            $this->setTailTrail($this->tail);
+        $this->positions[$element] = [$x, $y];
+        $this->setElementPaths($element, $x, $y);
+    }
+
+    public function setElementPaths(int $element=0, int $x=0, int $y=0): void
+    {
+        $this->paths[$element][] = "{$x},{$y}";
+    }
+
+    public function getElementPosition(int $element=0): array
+    {
+        return $this->positions[$element];
+    }
+
+    public function moverCabecera(string $movimiento): void
+    {
+        $posicion = $this->getElementPosition(0);
+        switch ($movimiento) {
+            case 'R':
+                $this->setElementPosition(0, $posicion[0]+1, $posicion[1]);
+                break;
+            case 'L':
+                $this->setElementPosition(0, $posicion[0]-1, $posicion[1]);
+                break;
+            case 'U':
+                $this->setElementPosition(0, $posicion[0], $posicion[1]+1);
+                break;
+            case 'D':
+                $this->setElementPosition(0, $posicion[0], $posicion[1]-1);
+                break;
+        }
+        for ($i=1; $i<=$this->elements; $i++) {
+            $this->moverElemento($i);
+        }
+    }
+
+    public function moverElemento(int $elemento): void
+    {
+        $posicion_elemento = $this->getElementPosition($elemento);
+        $posicion_anterior = $this->getElementPosition($elemento-1);
+
+        if ($posicion_anterior[0] == $posicion_elemento[0] && $posicion_anterior[1] == $posicion_elemento[1]) {
             return;
         }
 
-        if (abs($this->head[0]-$this->tail[0]) <= 1 && abs($this->head[1]-$this->tail[1]) <= 1) {
-            $this->setTailTrail($this->tail);
+        if (abs($posicion_anterior[0]-$posicion_elemento[0]) <= 1 && abs($posicion_anterior[1]-$posicion_elemento[1]) <= 1) {
             return;
         }
 
         // T.H
-        if ($this->head[0] > $this->tail[0] && $this->head[1] === $this->tail[1]) {
-            $this->tail[0] = $this->tail[0]+1;
-            $this->setTailTrail($this->tail);
+        if ($posicion_anterior[0] > $posicion_elemento[0] && $posicion_anterior[1] === $posicion_elemento[1]) {
+            $this->setElementPosition($elemento, $posicion_elemento[0]+1, $posicion_elemento[1]);
             return;
         }
 
         // H.T
-        if ($this->head[0] < $this->tail[0] && $this->head[1] === $this->tail[1]) {
-            $this->tail[0] = $this->tail[0]-1;
-            $this->setTailTrail($this->tail);
+        if ($posicion_anterior[0] < $posicion_elemento[0] && $posicion_anterior[1] === $posicion_elemento[1]) {
+            $this->setElementPosition($elemento, $posicion_elemento[0]-1, $posicion_elemento[1]);
             return;
         }
 
         // H
         // .
         // T
-        if ($this->head[0] === $this->tail[0] && $this->head[1] > $this->tail[1]) {
-            $this->tail[1] = $this->tail[1]+1;
-            $this->setTailTrail($this->tail);
+        if ($posicion_anterior[0] === $posicion_elemento[0] && $posicion_anterior[1] > $posicion_elemento[1]) {
+            $this->setElementPosition($elemento, $posicion_elemento[0], $posicion_elemento[1]+1);
             return;
         }
 
         // T
         // .
         // H
-        if ($this->head[0] === $this->tail[0] && $this->head[1] < $this->tail[1]) {
-            $this->tail[1] = $this->tail[1]-1;
-            $this->setTailTrail($this->tail);
+        if ($posicion_anterior[0] === $posicion_elemento[0] && $posicion_anterior[1] < $posicion_elemento[1]) {
+            $this->setElementPosition($elemento, $posicion_elemento[0], $posicion_elemento[1]-1);
             return;
         }
 
-        if ($this->head[0] !== $this->tail[0]) {
-            $this->tail[0] = $this->tail[0] + ( $this->head[0]>$this->tail[0] ? 1 : -1 );
+        if ($posicion_anterior[0] !== $posicion_elemento[0]) {
+            $posicion_elemento[0] = $posicion_elemento[0] + ( $posicion_anterior[0]>$posicion_elemento[0] ? 1 : -1 );
         }
-        if ($this->head[1] !== $this->tail[1]) {
-            $this->tail[1] = $this->tail[1] + ( $this->head[1]>$this->tail[1] ? 1 : -1 );
+        if ($posicion_anterior[1] !== $posicion_elemento[1]) {
+            $posicion_elemento[1] = $posicion_elemento[1] + ( $posicion_anterior[1]>$posicion_elemento[1] ? 1 : -1 );
         }
-
-        $this->setTailTrail($this->tail);
+        $this->setElementPosition($elemento, $posicion_elemento[0], $posicion_elemento[1]);
         return;
     }
 
-    public function getTailTrail()
+    public function getElementPaths(int $elemento): array
     {
-        return $this->trail;
+        return $this->paths[$elemento];
     }
 
-    public function setTailTrail(array $position=[])
+    public function countDifferentElementPaths(int $elemento): int
     {
-        $this->trail[] = $position[0] . ',' . $position[1];
-    }
-
-    public function countDifferentTailTrail()
-    {
-        return count(array_unique($this->trail));
+        return count(array_unique($this->paths[$elemento]));
     }
 }
