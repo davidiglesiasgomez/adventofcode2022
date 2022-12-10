@@ -114,4 +114,15 @@ class Day9
     {
         return count(array_unique($this->paths[$elemento]));
     }
+
+    public function procesarLineas(array $lineas): void
+    {
+        foreach ($lineas as $linea) {
+            if (preg_match('/([RULD]) ([0-9]+)/', $linea, $matches)) {
+                for ($i=0; $i<$matches[2]; $i++) {
+                    $this->moverCabecera($matches[1]);
+                }
+            }
+        }
+    }
 }
