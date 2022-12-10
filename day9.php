@@ -2,7 +2,7 @@
 
 include_once('vendor/autoload.php');
 
-$lines = file('input.day9.txt');
+$lines = file('input/input.day9.txt');
 // echo print_r($lines, true) . PHP_EOL;
 
 $day9Obj = new \AdventOfCode2022\Day9(1, 0, 0);
