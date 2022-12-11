@@ -28,6 +28,19 @@ EOD;
         $this->assertEquals(21, $day8Obj->contarVisibles());
     }
 
+    public function testComprobarOtroEjemploTareaUno()
+    {
+        $input = <<<EOD
+11111
+11211
+11111
+EOD;
+        $lines = explode("\n", $input);
+
+        $day8Obj = new Day8($lines);
+        $this->assertEquals(13, $day8Obj->contarVisibles());
+    }
+
     public function testComprobarEjemploTareaDos()
     {
         $input = <<<EOD

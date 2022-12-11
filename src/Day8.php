@@ -18,8 +18,8 @@ class Day8
     public function contarVisibles()
     {
         $cuenta = 0;
-        for ($i=0; $i<$this->x; $i++) {
-            for ($j=0; $j<$this->y; $j++) {
+        for ($i=0; $i<$this->y; $i++) {
+            for ($j=0; $j<$this->x; $j++) {
                 $cuenta += ( $this->esVisible($i, $j) ? 1 : 0 );
             }
         }
@@ -28,7 +28,7 @@ class Day8
 
     private function esVisible(int $x=0, int $y=0): bool
     {
-        if ($x === 0 || $y === 0 || $x === $this->x-1 || $y == $this->y-1) {
+        if ($x === 0 || $y === 0 || $x === $this->y-1 || $y == $this->x-1) {
             return true;
         }
 
@@ -41,7 +41,7 @@ class Day8
         }
 
         $haymasalto2 = false;
-        for ($i=$x+1; $i<$this->x; $i++) {
+        for ($i=$x+1; $i<$this->y; $i++) {
             if ($this->grid[$i][$y]>=$this->grid[$x][$y]) {
                 $haymasalto2 = true;
                 break;
@@ -57,7 +57,7 @@ class Day8
         }
 
         $haymasalto4 = false;
-        for ($j=$y+1; $j<$this->y; $j++) {
+        for ($j=$y+1; $j<$this->x; $j++) {
             if ($this->grid[$x][$j]>=$this->grid[$x][$y]) {
                 $haymasalto4 = true;
                 break;
