@@ -53,4 +53,24 @@ class Day10
         return $suma;
     }
 
+    public function renderScreen()
+    {
+        $output = '';
+        $offset = 0;
+        foreach ($this->x as $i=>$x) {
+            if ($i === 0) {
+                continue;
+            }
+            if ($x === $i-$offset || $x === $i-1-$offset || $x === $i-2-$offset) {
+                $output .= '#';
+            } else {
+                $output .= '.';
+            }
+            if ($i % 40 === 0) {
+                $output .= PHP_EOL;
+                $offset += 40;
+            }
+        }
+        return trim($output);
+    }
 }

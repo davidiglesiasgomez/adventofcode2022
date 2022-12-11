@@ -7,3 +7,5 @@ $lines = file('input/input.day10.txt');
 
 $day10Obj = new \AdventOfCode2022\Day10($lines);
 echo 'Suma ' . $day10Obj->sumSignalStrengthAtCycles([20, 60, 100, 140, 180, 220]) . PHP_EOL;
+
+echo $day10Obj->renderScreen() . PHP_EOL;
