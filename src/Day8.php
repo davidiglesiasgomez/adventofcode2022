@@ -26,7 +26,7 @@ class Day8
         return $cuenta;
     }
 
-    private function esVisible(int $x=0, int $y=0)
+    private function esVisible(int $x=0, int $y=0): bool
     {
         if ($x === 0 || $y === 0 || $x === $this->x-1 || $y == $this->y-1) {
             return true;
@@ -67,9 +67,56 @@ class Day8
         return !($haymasalto1 && $haymasalto2 && $haymasalto3 && $haymasalto4);
     }
 
-    public function obtenerMaximoArbolesVisiblesDesdeCualquierArbol()
+    public function obtenerMaximoArbolesVisiblesDesdeCualquierArbol(): int
     {
         $maximo = 0;
+        for ($i=0; $i<$this->y; $i++) {
+            for ($j=0; $j<$this->x; $j++) {
+                $arboles = (int)$this->contarArbolesVisiblesDesdeArbol($i, $j);
+                $maximo = ( $arboles>$maximo ? $arboles : $maximo );
+            }
+        }
         return $maximo;
+    }
+
+    private function contarArbolesVisiblesDesdeArbol(int $x=0, int $y=0): int
+    {
+        if ($x === 0 || $y === 0 || $x === $this->y-1 || $y == $this->x-1) {
+            return 0;
+        }
+
+        $arbolesvisibles1 = 0;
+        for ($i=$x-1; $i>=0; $i--) {
+            $arbolesvisibles1++;
+            if ($this->grid[$i][$y]>=$this->grid[$x][$y]) {
+                break;
+            }
+        }
+
+        $arbolesvisibles2 = 0;
+        for ($i=$x+1; $i<$this->y; $i++) {
+            $arbolesvisibles2++;
+            if ($this->grid[$i][$y]>=$this->grid[$x][$y]) {
+                break;
+            }
+        }
+
+        $arbolesvisibles3 = 0;
+        for ($j=$y-1; $j>=0; $j--) {
+            $arbolesvisibles3++;
+            if ($this->grid[$x][$j]>=$this->grid[$x][$y]) {
+                break;
+            }
+        }
+
+        $arbolesvisibles4 = 0;
+        for ($j=$y+1; $j<$this->x; $j++) {
+            $arbolesvisibles4++;
+            if ($this->grid[$x][$j]>=$this->grid[$x][$y]) {
+                break;
+            }
+        }
+
+        return (int)($arbolesvisibles1 * $arbolesvisibles2 * $arbolesvisibles3 * $arbolesvisibles4);
     }
 }

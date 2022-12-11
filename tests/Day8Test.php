@@ -42,4 +42,17 @@ EOD;
         $day8Obj = new Day8($lines);
         $this->assertEquals(8, $day8Obj->obtenerMaximoArbolesVisiblesDesdeCualquierArbol());
     }
+
+    public function testComprobarOtroEjemploTareaDos()
+    {
+        $input = <<<EOD
+11111
+11211
+11111
+EOD;
+        $lines = explode("\n", $input);
+
+        $day8Obj = new Day8($lines);
+        $this->assertEquals(4, $day8Obj->obtenerMaximoArbolesVisiblesDesdeCualquierArbol());
+    }
 }
