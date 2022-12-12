@@ -22,7 +22,7 @@ class Monkey
         $this->false = $false;
     }
 
-    public function ejecutarRonda()
+    public function ejecutarRonda($worry_divider=3)
     {
         if (empty($this->items)) {
             return;
@@ -31,6 +31,7 @@ class Monkey
         $retorno = [];
         foreach ($this->items as $item) {
             $item = $this->actualizarItem($item);
+            $item = floor($item/$worry_divider);
             $retorno[( $item % $this->divisible === 0 ? $this->true : $this->false )][] = $item;
             $this->checks++;
         }
@@ -42,7 +43,7 @@ class Monkey
     {
         if (preg_match('/(old|[0-9]+) (\+|\*) (old|[0-9]+)/', $this->operation, $matches)) {
             eval('$item = ' . ( $matches[1] === 'old' ? $item : (int)$matches[1] ) . "{$matches[2]}" . ( $matches[3] === 'old' ? $item : (int)$matches[3] ) . ';');
-            return intdiv($item, 3);
+            return $item;
         }
     }
 
@@ -131,14 +132,14 @@ class Day11
         return $this->monkeys[$id];
     }
 
-    public function ejecutarRonda()
+    public function ejecutarRonda($worry_divider=3)
     {
         if (empty($this->monkeys)) {
             return;
         }
 
         foreach ($this->monkeys as $monkeyObj) {
-            $retorno = $monkeyObj->ejecutarRonda();
+            $retorno = $monkeyObj->ejecutarRonda($worry_divider);
             if (empty($retorno)) {
                 continue;
             }

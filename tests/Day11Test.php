@@ -52,6 +52,7 @@ EOD;
         // $this->markTestSkipped();
 
         $day11Obj = new Day11($this->input);
+
         $this->assertEquals(new Monkey(0, [79, 98], 'old * 19', 23, 2, 3), $day11Obj->obtenerMono(0));
         $this->assertEquals(new Monkey(1, [54, 65, 75, 74], 'old + 6', 19, 2, 0), $day11Obj->obtenerMono(1));
         $this->assertEquals(new Monkey(2, [79, 60, 97], 'old * old', 13, 1, 3), $day11Obj->obtenerMono(2));
@@ -80,7 +81,7 @@ EOD;
         }
     }
 
-    public function regalosTrasRondas():array
+    public function regalosTrasRondas(): array
     {
         $retorno = [
             'ronda1' => [1, [
@@ -183,5 +184,47 @@ EOD;
             $day11Obj->ejecutarRonda();
         }
         $this->assertEquals(10605, $day11Obj->comprobarTrabajoTopDos());
+    }
+
+    /**
+     * @dataProvider comprobacionesTrasRondas
+     */
+    public function testComprobarTotalesTareaDos(int $rondas=0, array $totales=[])
+    {
+        // $this->markTestSkipped();
+
+        $day11Obj = new Day11($this->input);
+
+        if (empty($rondas) || empty($totales)) {
+            return;
+        }
+
+        for ($i=1; $i<=$rondas; $i++) {
+            $day11Obj->ejecutarRonda(1);
+        }
+
+        foreach (array_keys($totales) as $mono_id) {
+            $this->assertEquals($totales[$mono_id], $day11Obj->contarManipulacionesMono($mono_id));
+        }
+
+    }
+
+    public function comprobacionesTrasRondas(): array
+    {
+        $retorno = [
+            'ronda1' => [1, [
+                0 => 2,
+                1 => 4,
+                2 => 3,
+                3 => 6,
+            ]],
+            // 'ronda20' => [20, [
+            //     0 => 99,
+            //     1 => 97,
+            //     2 => 8,
+            //     3 => 103,
+            // ]],
+        ];
+        return $retorno;
     }
 }
