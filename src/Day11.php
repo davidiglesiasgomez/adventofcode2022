@@ -10,6 +10,7 @@ class Monkey
     private $divisible = 0;
     private $true = 0;
     private $false = 0;
+    private $checks = 0;
 
     public function __construct($id=0, $items=[], $operation='', $divisible=1, $true=0, $false=0)
     {
@@ -31,6 +32,7 @@ class Monkey
         foreach ($this->items as $item) {
             $item = $this->actualizarItem($item);
             $retorno[( $item % $this->divisible === 0 ? $this->true : $this->false )][] = $item;
+            $this->checks++;
         }
         $this->items = [];
         return $retorno;
@@ -49,14 +51,19 @@ class Monkey
         $this->items = array_merge($this->items, $items);
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getItems()
+    public function getItems(): array
     {
         return $this->items;
+    }
+
+    public function getChecks(): int
+    {
+        return $this->checks;
     }
 }
 
@@ -144,5 +151,34 @@ class Day11
     public function comprobarMono(int $id=0): array
     {
         return $this->monkeys[$id]->getItems();
+    }
+
+    public function contarManipulacionesMono(int $id=0): int
+    {
+        return $this->monkeys[$id]->getChecks();
+    }
+
+    public function comprobarTrabajoTopDos(): int
+    {
+        if (empty($this->monkeys)) {
+            return 0;
+        }
+
+        $top1 = 0;
+        $top2 = 0;
+        foreach ($this->monkeys as $monkeyObj) {
+            $checks = $monkeyObj->getChecks();
+            if ($checks >= $top1) {
+                $top2 = $top1;
+                $top1 = $checks;
+                continue;
+            }
+            if ($checks >= $top2) {
+                $top2 = $checks;
+                continue;
+            }
+        }
+
+        return $top1 * $top2;
     }
 }

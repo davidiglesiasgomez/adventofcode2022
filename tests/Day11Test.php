@@ -159,4 +159,29 @@ EOD;
         ];
         return $retorno;
     }
+
+    public function testComprobarTotalesTareaUno()
+    {
+        // $this->markTestSkipped();
+
+        $day11Obj = new Day11($this->input);
+        for ($i=1; $i<=20; $i++) {
+            $day11Obj->ejecutarRonda();
+        }
+        $this->assertEquals(101, $day11Obj->contarManipulacionesMono(0));
+        $this->assertEquals(95, $day11Obj->contarManipulacionesMono(1));
+        $this->assertEquals(7, $day11Obj->contarManipulacionesMono(2));
+        $this->assertEquals(105, $day11Obj->contarManipulacionesMono(3));
+    }
+
+    public function testComprobarTrabajoTareaUno()
+    {
+        // $this->markTestSkipped();
+
+        $day11Obj = new Day11($this->input);
+        for ($i=1; $i<=20; $i++) {
+            $day11Obj->ejecutarRonda();
+        }
+        $this->assertEquals(10605, $day11Obj->comprobarTrabajoTopDos());
+    }
 }
