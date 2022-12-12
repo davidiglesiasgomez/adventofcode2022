@@ -2,6 +2,10 @@
 
 namespace AdventOfCode2022;
 
+use \Brick\Math\BigInteger;
+use \Brick\Math\RoundingMode;
+use \Exception;
+
 class Monkey
 {
     private $id = 0;
@@ -15,7 +19,11 @@ class Monkey
     public function __construct($id=0, $items=[], $operation='', $divisible=1, $true=0, $false=0)
     {
         $this->id = $id;
-        $this->items = $items;
+        // $this->items = $items;
+        $this->items = [];
+        foreach ($items as $item) {
+            $this->items[] = BigInteger::of($item);
+        }
         $this->operation = $operation;
         $this->divisible = $divisible;
         $this->true = $true;
@@ -31,19 +39,35 @@ class Monkey
         $retorno = [];
         foreach ($this->items as $item) {
             $item = $this->actualizarItem($item);
-            $item = floor($item/$worry_divider);
-            $retorno[( $item % $this->divisible === 0 ? $this->true : $this->false )][] = $item;
+            $item = $item->dividedBy($worry_divider, RoundingMode::DOWN);
+            try {
+                $item->dividedBy($this->divisible);
+                $retorno[$this->true][] = $item;
+            } catch (Exception $ex) {
+                $retorno[$this->false][] = $item;
+            }
             $this->checks++;
         }
         $this->items = [];
         return $retorno;
     }
 
-    private function actualizarItem($item=0)
+    private function actualizarItem(BigInteger $item): BigInteger
     {
         if (preg_match('/(old|[0-9]+) (\+|\*) (old|[0-9]+)/', $this->operation, $matches)) {
-            eval('$item = ' . ( $matches[1] === 'old' ? $item : (int)$matches[1] ) . "{$matches[2]}" . ( $matches[3] === 'old' ? $item : (int)$matches[3] ) . ';');
-            return $item;
+            // eval('$item = ' . ( $matches[1] === 'old' ? $item : (int)$matches[1] ) . "{$matches[2]}" . ( $matches[3] === 'old' ? $item : (int)$matches[3] ) . ';');
+            $item1 = ( $matches[1] === 'old' ? $item : $matches[1] );
+            $operation = trim($matches[2]);
+            $item2 = ( $matches[3] === 'old' ? $item : $matches[3] );
+            switch ($operation) {
+                case '+':
+                    return $item1->plus($item2);
+                    break;
+                case '*':
+                    return $item1->multipliedBy($item2);
+                    break;
+            }
+            throw new Exception('Error actualizarItem');
         }
     }
 
@@ -181,5 +205,19 @@ class Day11
         }
 
         return $top1 * $top2;
+    }
+
+    public function comprobarRegalosMono(int $id=0, array $regalos=[]): bool
+    {
+        if (count($this->monkeys[$id]->getItems()) !== count($regalos)) {
+            return false;
+        }
+
+        foreach ($this->monkeys[$id]->getItems() as $item_id=>$item) {
+            if ($item->compareTo($regalos[$item_id]) !== 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

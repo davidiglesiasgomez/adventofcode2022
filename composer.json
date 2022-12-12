@@ -9,5 +9,8 @@
     },
     "config": {
         "bin-dir": "bin/"
+    },
+    "require": {
+        "brick/math": "^0.10.2"
     }
 }

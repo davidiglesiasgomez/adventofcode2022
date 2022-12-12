@@ -41,6 +41,8 @@ EOD;
 
     public function testComprobarQueSePuedeCrear()
     {
+        // $this->markTestSkipped();
+
         $this->assertInstanceOf(
             Day11::class,
             new Day11('')
@@ -52,6 +54,8 @@ EOD;
         // $this->markTestSkipped();
 
         $day11Obj = new Day11($this->input);
+
+        $day11Obj->obtenerMono(0);
 
         $this->assertEquals(new Monkey(0, [79, 98], 'old * 19', 23, 2, 3), $day11Obj->obtenerMono(0));
         $this->assertEquals(new Monkey(1, [54, 65, 75, 74], 'old + 6', 19, 2, 0), $day11Obj->obtenerMono(1));
@@ -77,7 +81,7 @@ EOD;
         }
 
         foreach (array_keys($regalos) as $mono_id) {
-            $this->assertEquals($regalos[$mono_id], $day11Obj->comprobarMono($mono_id));
+            $this->assertEquals(true, $day11Obj->comprobarRegalosMono($mono_id, $regalos[$mono_id]));
         }
     }
 
@@ -189,41 +193,51 @@ EOD;
     /**
      * @dataProvider comprobacionesTrasRondas
      */
-    public function testComprobarTotalesTareaDos(int $rondas=0, array $totales=[])
+    public function testComprobarTotalesTareaDos(int $numero_rondas=0, array $rondas=[])
     {
         // $this->markTestSkipped();
 
         $day11Obj = new Day11($this->input);
 
-        if (empty($rondas) || empty($totales)) {
+        if (empty($numero_rondas)) {
             return;
         }
 
-        for ($i=1; $i<=$rondas; $i++) {
+        for ($i=1; $i<=$numero_rondas; $i++) {
+            echo PHP_EOL . 'i ' . $i . PHP_EOL;
             $day11Obj->ejecutarRonda(1);
+            if (empty($rondas[$i])) {
+                continue;
+            }
+            foreach (array_keys($rondas[$i]) as $mono_id) {
+                $this->assertEquals($rondas[$i][$mono_id], $day11Obj->contarManipulacionesMono($mono_id));
+            }
         }
-
-        foreach (array_keys($totales) as $mono_id) {
-            $this->assertEquals($totales[$mono_id], $day11Obj->contarManipulacionesMono($mono_id));
-        }
-
     }
 
     public function comprobacionesTrasRondas(): array
     {
         $retorno = [
-            'ronda1' => [1, [
-                0 => 2,
-                1 => 4,
-                2 => 3,
-                3 => 6,
-            ]],
-            // 'ronda20' => [20, [
-            //     0 => 99,
-            //     1 => 97,
-            //     2 => 8,
-            //     3 => 103,
-            // ]],
+            'rondas' => [1000,
+                1 => [1, [
+                    0 => 2,
+                    1 => 4,
+                    2 => 3,
+                    3 => 6,
+                ]],
+                20 => [20, [
+                    0 => 99,
+                    1 => 97,
+                    2 => 8,
+                    3 => 103,
+                ]],
+                // 1000 => [1000, [
+                //     0 => 5204,
+                //     1 => 4792,
+                //     2 => 199,
+                //     3 => 5192,
+                // ]],
+            ],
         ];
         return $retorno;
     }
