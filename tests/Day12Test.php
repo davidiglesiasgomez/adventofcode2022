@@ -109,7 +109,7 @@ EOD;
 
     public function testComprobarEjemploTareaUno()
     {
-        $this->markTestSkipped();
+        // $this->markTestSkipped();
 
         $input = <<<EOD
 Sabqponm

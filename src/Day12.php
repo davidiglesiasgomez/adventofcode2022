@@ -2,29 +2,36 @@
 
 namespace AdventOfCode2022;
 
-use Exception;
-
-use function PHPUnit\Framework\throwException;
+use \Exception;
 
 class Day12
 {
-    private $terrain = '';
+    private $terreno = '';
 
     public function __construct(string $input='')
     {
-        $this->terrain = trim($input);
+        $this->terreno = str_replace(["\r\n", "\r", "\n"], PHP_EOL, trim($input));
     }
 
     public function obtainFewerSteps(): int
     {
-        return 31;
+        // return 31;
+        $posicion_inicial = $this->obtenerPosicionInicial($this->terreno);
+        $caminos = $this->recorrerCaminos([$this->terreno], 0, $posicion_inicial);
+        return $this->obtenerMinimoNumeroPasos($caminos);
     }
 
     public function obtenerPosicion($terreno, $x=0, $y=0)
     {
         $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
-        $posicion = $x + $offset * $y;
+        $posicion = intval($x + $offset * $y);
+        if ($x<0) {
+            throw new Exception('Out of range');
+        }
         if ($x>$offset-strlen(PHP_EOL)-1) {
+            throw new Exception('Out of range');
+        }
+        if ($y<0) {
             throw new Exception('Out of range');
         }
         if ($y>strlen($terreno)/$offset) {
@@ -36,8 +43,14 @@ class Day12
     public function actualizarPosicion($terreno, $x=0, $y=0, $simbolo='.')
     {
         $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
-        $posicion = $x + $offset * $y;
+        $posicion = intval($x + $offset * $y);
+        if ($x<0) {
+            throw new Exception('Out of range');
+        }
         if ($x>$offset-strlen(PHP_EOL)-1) {
+            throw new Exception('Out of range');
+        }
+        if ($y<0) {
             throw new Exception('Out of range');
         }
         if ($y>strlen($terreno)/$offset) {
@@ -62,16 +75,20 @@ class Day12
         throw new Exception('Character non valid');
     }
 
-    public function prueba()
-    {
-        $terreno = $this->terrain;
-        $posicion_inicial = [0, 0];
-        $caminos = $this->recorrerCaminos([$terreno], 0, $posicion_inicial);
-        foreach ($caminos as $camino) {
-            echo $this->imprimirCamino($camino) . PHP_EOL . PHP_EOL;
-            echo $this->contarPasos($camino) . PHP_EOL . PHP_EOL;
-        }
-    }
+    // public function prueba()
+    // {
+    //     $terreno = $this->terreno;
+
+    //     $posicion_inicial = $this->obtenerPosicionInicial($terreno);
+
+    //     $caminos = $this->recorrerCaminos([$terreno], 0, $posicion_inicial);
+    //     foreach ($caminos as $camino) {
+    //         echo $terreno . PHP_EOL . PHP_EOL;
+    //         echo $this->imprimirCamino($camino) . PHP_EOL . PHP_EOL;
+    //         echo $this->contarPasos($camino) . PHP_EOL . PHP_EOL;
+    //     }
+    //     return $this->obtenerMinimoNumeroPasos($caminos);
+    // }
 
     public function recorrerCaminos($caminos, $camino_id, $posicion)
     {
@@ -83,15 +100,15 @@ class Day12
         if (empty($pasos)) {
             return $caminos;
         }
+        $camino_actual = $caminos[$camino_id];
         foreach ($pasos as $indice=>$paso) {
-            $camino_actual = $caminos[$camino_id];
             if ($indice === 0) { // Seguimos el camino en el que estamos
                 $nueva_posicion = $this->calcularPosicionSegunSigno($posicion, $paso);
                 $caminos[$camino_id] = $this->actualizarPosicion($camino_actual, $posicion[0], $posicion[1], $paso);
                 $caminos = $this->recorrerCaminos($caminos, $camino_id, $nueva_posicion);
 
             } else { // Creamos otro camino nuevo para seguirlo
-                $nuevo_camino_id = 1+count($caminos);
+                $nuevo_camino_id = 1+count($caminos)-1;
                 $nueva_posicion = $this->calcularPosicionSegunSigno($posicion, $paso);
                 $caminos[$nuevo_camino_id] = $this->actualizarPosicion($camino_actual, $posicion[0], $posicion[1], $paso);
                 $caminos = $this->recorrerCaminos($caminos, $nuevo_camino_id, $nueva_posicion);
@@ -102,7 +119,7 @@ class Day12
 
     public function obtenerOpcionesPasos($terreno, $posicion_actual)
     {
-        $elevacion_actual = $this->obtenerElevacion($this->obtenerPosicion($this->terrain, $posicion_actual[0], $posicion_actual[1]));
+        $elevacion_actual = $this->obtenerElevacion($this->obtenerPosicion($this->terreno, $posicion_actual[0], $posicion_actual[1]));
         $retorno = [];
         $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '^'), '^');
         $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '!'), '!');
@@ -142,6 +159,7 @@ class Day12
             }
             return $signo_retorno;
         } catch (Exception $ex) {
+            // echo $ex->getMessage() . PHP_EOL;
         }
     }
 
@@ -153,10 +171,33 @@ class Day12
         echo $terreno;
     }
 
-    public function contarPasos($terreno)
+    public function contarPasos($camino)
     {
-        $caracteres = count_chars($terreno, 0);
+        $caracteres = count_chars($camino, 0);
         // echo '$caracteres ' . print_r($caracteres, true) . PHP_EOL;
         return $caracteres[ord('^')] + $caracteres[ord('!')] + $caracteres[ord('<')] + $caracteres[ord('>')];
+    }
+
+    public function obtenerMinimoNumeroPasos($caminos): int
+    {
+        if (empty($caminos)) {
+            return 0;
+        }
+        $minimo = 0;
+        foreach ($caminos as $camino) {
+            if (strpos($camino, 'F') === false) {
+                continue;
+            }
+            $pasos = $this->contarPasos($camino);
+            $minimo = ( $minimo === 0 || $minimo > $pasos ? $pasos : $minimo );
+        }
+        return $minimo;
+    }
+
+    public function obtenerPosicionInicial($terreno)
+    {
+        $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
+        $posicion = strpos($terreno, 'S');
+        return [$posicion%$offset, floor($posicion/$offset)];
     }
 }
