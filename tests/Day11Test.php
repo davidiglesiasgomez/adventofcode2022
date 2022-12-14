@@ -45,7 +45,7 @@ EOD;
 
         $this->assertInstanceOf(
             Day11::class,
-            new Day11('')
+            new Day11('', 1)
         );
     }
 
@@ -53,7 +53,7 @@ EOD;
     {
         // $this->markTestSkipped();
 
-        $day11Obj = new Day11($this->input);
+        $day11Obj = new Day11($this->input, 1);
 
         $day11Obj->obtenerMono(0);
 
@@ -63,113 +63,11 @@ EOD;
         $this->assertEquals(new Monkey(3, [74], 'old + 3', 17, 0, 1), $day11Obj->obtenerMono(3));
     }
 
-    /**
-     * @dataProvider regalosTrasRondas
-     */
-    public function testComprobarEjemploTareaUno(int $rondas=0, array $regalos=[])
-    {
-        // $this->markTestSkipped();
-
-        $day11Obj = new Day11($this->input);
-
-        if (empty($rondas) || empty($regalos)) {
-            return;
-        }
-
-        for ($i=1; $i<=$rondas; $i++) {
-            $day11Obj->ejecutarRonda();
-        }
-
-        foreach (array_keys($regalos) as $mono_id) {
-            $this->assertEquals(true, $day11Obj->comprobarRegalosMono($mono_id, $regalos[$mono_id]));
-        }
-    }
-
-    public function regalosTrasRondas(): array
-    {
-        $retorno = [
-            'ronda1' => [1, [
-                0 => [20, 23, 27, 26],
-                1 => [2080, 25, 167, 207, 401, 1046],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda2' => [2, [
-                0 => [695, 10, 71, 135, 350],
-                1 => [43, 49, 58, 55, 362],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda3' => [3, [
-                0 => [16, 18, 21, 20, 122],
-                1 => [1468, 22, 150, 286, 739],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda4' => [4, [
-                0 => [491, 9, 52, 97, 248, 34],
-                1 => [39, 45, 43, 258],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda5' => [5, [
-                0 => [15, 17, 16, 88, 1037],
-                1 => [20, 110, 205, 524, 72],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda6' => [6, [
-                0 => [8, 70, 176, 26, 34],
-                1 => [481, 32, 36, 186, 2190],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda7' => [7, [
-                0 => [162, 12, 14, 64, 732, 17],
-                1 => [148, 372, 55, 72],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda8' => [8, [
-                0 => [51, 126, 20, 26, 136],
-                1 => [343, 26, 30, 1546, 36],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda9' => [9, [
-                0 => [116, 10, 12, 517, 14],
-                1 => [108, 267, 43, 55, 288],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda10' => [10, [
-                0 => [91, 16, 20, 98],
-                1 => [481, 245, 22, 26, 1092, 30],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda15' => [15, [
-                0 => [83, 44, 8, 184, 9, 20, 26, 102],
-                1 => [110, 36],
-                2 => [],
-                3 => [],
-            ]],
-            'ronda20' => [20, [
-                0 => [10, 12, 14, 26, 34],
-                1 => [245, 93, 53, 199, 115],
-                2 => [],
-                3 => [],
-            ]],
-
-        ];
-        return $retorno;
-    }
-
     public function testComprobarTotalesTareaUno()
     {
         // $this->markTestSkipped();
 
-        $day11Obj = new Day11($this->input);
+        $day11Obj = new Day11($this->input, 1);
         for ($i=1; $i<=20; $i++) {
             $day11Obj->ejecutarRonda();
         }
@@ -183,7 +81,7 @@ EOD;
     {
         // $this->markTestSkipped();
 
-        $day11Obj = new Day11($this->input);
+        $day11Obj = new Day11($this->input, 1);
         for ($i=1; $i<=20; $i++) {
             $day11Obj->ejecutarRonda();
         }
@@ -197,15 +95,14 @@ EOD;
     {
         // $this->markTestSkipped();
 
-        $day11Obj = new Day11($this->input);
+        $day11Obj = new Day11($this->input, 2);
 
         if (empty($numero_rondas)) {
             return;
         }
 
         for ($i=1; $i<=$numero_rondas; $i++) {
-            echo PHP_EOL . 'i ' . $i . PHP_EOL;
-            $day11Obj->ejecutarRonda(1);
+            $day11Obj->ejecutarRonda(2);
             if (empty($rondas[$i])) {
                 continue;
             }
@@ -218,27 +115,93 @@ EOD;
     public function comprobacionesTrasRondas(): array
     {
         $retorno = [
-            'rondas' => [1000,
-                1 => [1, [
+            'rondas' => [10000, [
+                1 => [
                     0 => 2,
                     1 => 4,
                     2 => 3,
                     3 => 6,
-                ]],
-                20 => [20, [
+                ],
+                20 => [
                     0 => 99,
                     1 => 97,
                     2 => 8,
                     3 => 103,
-                ]],
-                // 1000 => [1000, [
-                //     0 => 5204,
-                //     1 => 4792,
-                //     2 => 199,
-                //     3 => 5192,
-                // ]],
-            ],
+                ],
+                1000 => [
+                    0 => 5204,
+                    1 => 4792,
+                    2 => 199,
+                    3 => 5192,
+                ],
+                2000 => [
+                    0 => 10419,
+                    1 => 9577,
+                    2 => 392,
+                    3 => 10391,
+                ],
+                3000 => [
+                    0 => 15638,
+                    1 => 14358,
+                    2 => 587,
+                    3 => 15593,
+                ],
+                4000 => [
+                    0 => 20858,
+                    1 => 19138,
+                    2 => 780,
+                    3 => 20797,
+                ],
+                5000 => [
+                    0 => 26075,
+                    1 => 23921,
+                    2 => 974,
+                    3 => 26000,
+                ],
+                6000 => [
+                    0 => 31294,
+                    1 => 28702,
+                    2 => 1165,
+                    3 => 31204,
+                ],
+                7000 => [
+                    0 => 36508,
+                    1 => 33488,
+                    2 => 1360,
+                    3 => 36400,
+                ],
+                8000 => [
+                    0 => 41728,
+                    1 => 38268,
+                    2 => 1553,
+                    3 => 41606,
+                ],
+                9000 => [
+                    0 => 46945,
+                    1 => 43051,
+                    2 => 1746,
+                    3 => 46807,
+                ],
+                10000 => [
+                    0 => 52166,
+                    1 => 47830,
+                    2 => 1938,
+                    3 => 52013,
+                ],
+            ]],
         ];
         return $retorno;
+    }
+
+    public function testComprobarTrabajoTareaDos()
+    {
+        // $this->markTestSkipped();
+
+        $day11Obj = new Day11($this->input, 2);
+        for ($i=1; $i<=10000; $i++) {
+            $day11Obj->ejecutarRonda(2);
+        }
+
+        $this->assertEquals(2713310158, $day11Obj->comprobarTrabajoTopDos());
     }
 }
