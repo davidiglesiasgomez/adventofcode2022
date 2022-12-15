@@ -2,9 +2,21 @@
 
 include_once('vendor/autoload.php');
 
-$input = trim(file_get_contents('input/input.day12.txt'));
-// $input = str_replace(["\r\n", "\r", "\n"], PHP_EOL, $input);
-// echo $input;
+$input = file_get_contents('input/input.day12.txt');
+
+// $input = <<<EOD
+// Saa
+// aaa
+// aaa
+// EOD;
+
+// $input = <<<EOD
+// Sabqponm
+// abcryxxl
+// accszExk
+// acctuvwj
+// abdefghi
+// EOD;
 
 $day12Obj = new \AdventOfCode2022\Day12($input);
 echo 'Menos pasos: ' . $day12Obj->obtainFewerSteps();
