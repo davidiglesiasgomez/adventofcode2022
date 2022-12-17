@@ -28,3 +28,4 @@ $day12Obj = new \AdventOfCode2022\Day12($input);
 echo 'Posicion inicial: ' . json_encode($day12Obj->obtenerPosicionInicial()) . PHP_EOL;
 echo 'Posicion final: ' . json_encode($day12Obj->obtenerPosicionFinal()) . PHP_EOL;
 echo 'Distancia ' . $day12Obj->obtainFewerSteps([0, 20], [52, 20]) . PHP_EOL;
+echo 'Distancia ' . $day12Obj->obtainFewerStepsFromElevation() . PHP_EOL;

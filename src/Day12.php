@@ -43,6 +43,26 @@ class Day12
         return $this->terreno[$posicion];
     }
 
+    public function actualizarPosicion(string $terreno, int $x, int $y, string $simbolo='.'): string
+    {
+        $offset = (int)strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
+        $posicion = $x + $offset * $y;
+        if ($x<0) {
+            throw new Exception('Out of range');
+        }
+        if ($x>$offset-strlen(PHP_EOL)-1) {
+            throw new Exception('Out of range');
+        }
+        if ($y<0) {
+            throw new Exception('Out of range');
+        }
+        if ($y>strlen($terreno)/$offset) {
+            throw new Exception('Out of range');
+        }
+        $terreno[$posicion] = $simbolo;
+        return $terreno;
+    }
+
     public function calcularPosicionSegunSigno($posicion, $signo)
     {
         switch ($signo) {
@@ -173,7 +193,7 @@ class Day12
     {
         $retorno = $this->terreno;
         foreach ($this->visitas as $nodo) {
-            if (in_array($this->obtenerPosicion($retorno, $nodo[0], $nodo[1]), ['S', 'E'])) {
+            if (in_array($this->obtenerPosicion($nodo[0], $nodo[1]), ['S', 'E'])) {
                 continue;
             }
             $retorno = $this->actualizarPosicion($retorno, $nodo[0], $nodo[1], '.');
@@ -250,5 +270,28 @@ class Day12
     public function getNodos()
     {
         return $this->nodos;
+    }
+
+    public function obtainFewerStepsFromElevation()
+    {
+        // Minimo
+        $minimo = null;
+
+        // Necesito obtener los inicios
+        for ($i=0; $i<strlen($this->terreno); $i++) {
+            if (!in_array($this->terreno[$i], ['a', 'S'])) {
+                continue;
+            }
+            $distancia = $this->distancia($this->obtenerPosicionX($i), [52, 20]);
+            $minimo = ( $minimo === null || $minimo>$distancia ? $distancia : $minimo );
+        }
+
+        return $minimo;
+    }
+
+    public function obtenerPosicionX($posicion)
+    {
+        $offset = strpos($this->terreno, PHP_EOL) + strlen(PHP_EOL);
+        return [intval($posicion%$offset), intval(floor($posicion/$offset))];
     }
 }
