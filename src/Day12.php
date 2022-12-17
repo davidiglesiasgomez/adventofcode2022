@@ -7,24 +7,27 @@ use \Exception;
 class Day12
 {
     private $terreno = '';
+    private $cola = [];
+    private $visitas = [];
+    private $nodos = [];
 
     public function __construct(string $input='')
     {
-        $this->terreno = str_replace(["\r\n", "\r", "\n"], PHP_EOL, trim($input));
+        $this->terreno = preg_replace('~\R~u', "\r\n", trim($input));
     }
 
-    public function obtainFewerSteps(): int
+    public function obtainFewerSteps($posicion_inicial, $posicion_final): int
     {
-        // return 31;
-        $posicion_inicial = $this->obtenerPosicionInicial($this->terreno);
-        $caminos = $this->recorrerCaminos([$this->terreno], 0, $posicion_inicial);
-        return $this->obtenerMinimoNumeroPasos($caminos);
+        if (!$this->bfs($posicion_inicial, $posicion_final)) {
+            throw new Exception(sprintf('No se puede llegar de %s a %s', json_encode($posicion_inicial), json_encode($posicion_final)));
+        }
+        return $this->distancia($posicion_inicial, $posicion_final);
     }
 
-    public function obtenerPosicion($terreno, $x=0, $y=0)
+    public function obtenerPosicion(int $x, int $y): string
     {
-        $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
-        $posicion = intval($x + $offset * $y);
+        $offset = (int)strpos($this->terreno, PHP_EOL) + strlen(PHP_EOL);
+        $posicion = $x + $offset * $y;
         if ($x<0) {
             throw new Exception('Out of range');
         }
@@ -34,98 +37,10 @@ class Day12
         if ($y<0) {
             throw new Exception('Out of range');
         }
-        if ($y>strlen($terreno)/$offset) {
+        if ($y>strlen($this->terreno)/$offset) {
             throw new Exception('Out of range');
         }
-        return $terreno[$posicion];
-    }
-
-    public function actualizarPosicion($terreno, $x=0, $y=0, $simbolo='.')
-    {
-        $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
-        $posicion = intval($x + $offset * $y);
-        if ($x<0) {
-            throw new Exception('Out of range');
-        }
-        if ($x>$offset-strlen(PHP_EOL)-1) {
-            throw new Exception('Out of range');
-        }
-        if ($y<0) {
-            throw new Exception('Out of range');
-        }
-        if ($y>strlen($terreno)/$offset) {
-            throw new Exception('Out of range');
-        }
-        $terreno[$posicion] = $simbolo;
-        return $terreno;
-    }
-
-    public function obtenerElevacion(string $caracter='')
-    {
-        if ($caracter === 'S') {
-            return $this->obtenerElevacion('a');
-        }
-        if ($caracter === 'E') {
-            return $this->obtenerElevacion('z');
-        }
-        $ord = ord($caracter);
-        if ($ord>=97 && $ord<=122) {
-            return $ord - 97;
-        }
-        throw new Exception('Character non valid');
-    }
-
-    // public function prueba()
-    // {
-    //     $terreno = $this->terreno;
-
-    //     $posicion_inicial = $this->obtenerPosicionInicial($terreno);
-
-    //     $caminos = $this->recorrerCaminos([$terreno], 0, $posicion_inicial);
-    //     foreach ($caminos as $camino) {
-    //         echo $terreno . PHP_EOL . PHP_EOL;
-    //         echo $this->imprimirCamino($camino) . PHP_EOL . PHP_EOL;
-    //         echo $this->contarPasos($camino) . PHP_EOL . PHP_EOL;
-    //     }
-    //     return $this->obtenerMinimoNumeroPasos($caminos);
-    // }
-
-    public function recorrerCaminos($caminos, $camino_id, $posicion)
-    {
-        if ($this->obtenerPosicion($caminos[$camino_id], $posicion[0], $posicion[1]) === 'E') {
-            $caminos[$camino_id] = $this->actualizarPosicion($caminos[$camino_id], $posicion[0], $posicion[1], 'F');
-            return $caminos;
-        }
-        $pasos = $this->obtenerOpcionesPasos($caminos[$camino_id], $posicion);
-        if (empty($pasos)) {
-            return $caminos;
-        }
-        $camino_actual = $caminos[$camino_id];
-        foreach ($pasos as $indice=>$paso) {
-            if ($indice === 0) { // Seguimos el camino en el que estamos
-                $nueva_posicion = $this->calcularPosicionSegunSigno($posicion, $paso);
-                $caminos[$camino_id] = $this->actualizarPosicion($camino_actual, $posicion[0], $posicion[1], $paso);
-                $caminos = $this->recorrerCaminos($caminos, $camino_id, $nueva_posicion);
-
-            } else { // Creamos otro camino nuevo para seguirlo
-                $nuevo_camino_id = 1+count($caminos)-1;
-                $nueva_posicion = $this->calcularPosicionSegunSigno($posicion, $paso);
-                $caminos[$nuevo_camino_id] = $this->actualizarPosicion($camino_actual, $posicion[0], $posicion[1], $paso);
-                $caminos = $this->recorrerCaminos($caminos, $nuevo_camino_id, $nueva_posicion);
-            }
-        }
-        return $caminos;
-    }
-
-    public function obtenerOpcionesPasos($terreno, $posicion_actual)
-    {
-        $elevacion_actual = $this->obtenerElevacion($this->obtenerPosicion($this->terreno, $posicion_actual[0], $posicion_actual[1]));
-        $retorno = [];
-        $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '^'), '^');
-        $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '!'), '!');
-        $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '<'), '<');
-        $retorno[] = $this->puedoIrDireccion($terreno, $elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '>'), '>');
-        return array_values(array_filter($retorno));
+        return $this->terreno[$posicion];
     }
 
     public function calcularPosicionSegunSigno($posicion, $signo)
@@ -146,15 +61,15 @@ class Day12
         }
     }
 
-    public function puedoIrDireccion($terreno, $elevacion_actual, $posicion, $signo_retorno)
+    public function puedoIrDireccion($elevacion_actual, $posicion, $signo_retorno)
     {
         try {
-            $letra = $this->obtenerPosicion($terreno, $posicion[0], $posicion[1]);
+            $letra = $this->obtenerPosicion($posicion[0], $posicion[1]);
             if ($letra === 'S') {
                 throw new Exception('No tocar la salida');
             }
             $elevacion = $this->obtenerElevacion($letra);
-            if (!in_array($elevacion, [$elevacion_actual, $elevacion_actual+1])) {
+            if ($elevacion>$elevacion_actual+1) {
                 throw new Exception('No se puede subir');
             }
             return $signo_retorno;
@@ -163,41 +78,177 @@ class Day12
         }
     }
 
-    public function imprimirCamino($terreno)
+    public function bfs($posicion_inicial, $posicion_final)
     {
-        $terreno = preg_replace('/[a-z]/', '.', $terreno);
-        $terreno = str_replace('!', 'v', $terreno);
-        $terreno = str_replace('F', 'E', $terreno);
-        echo $terreno;
-    }
+        $this->cola = [];
+        $this->cola[] = $posicion_inicial;
 
-    public function contarPasos($camino)
-    {
-        $caracteres = count_chars($camino, 0);
-        // echo '$caracteres ' . print_r($caracteres, true) . PHP_EOL;
-        return $caracteres[ord('^')] + $caracteres[ord('!')] + $caracteres[ord('<')] + $caracteres[ord('>')];
-    }
+        while (count($this->cola) != 0) {
+            // echo 'cola ' . count($this->cola) . ' ' . json_encode($this->cola) . PHP_EOL;
+            // echo 'visitas ' . count($this->visitas) . ' ' . json_encode($this->visitas) . PHP_EOL;
 
-    public function obtenerMinimoNumeroPasos($caminos): int
-    {
-        if (empty($caminos)) {
-            return 0;
-        }
-        $minimo = 0;
-        foreach ($caminos as $camino) {
-            if (strpos($camino, 'F') === false) {
+            $nodo = array_shift($this->cola);
+            // echo 'nodo ' . "{$nodo[0]},{$nodo[1]}" . ' ' . $this->obtenerPosicion($nodo[0], $nodo[1]) . PHP_EOL;
+
+            $this->visitas[] = $nodo;
+
+            $this->nodos["{$nodo[0]},{$nodo[1]}"] = [];
+            $this->nodos["{$nodo[0]},{$nodo[1]}"]['nodo'] = "{$nodo[0]},{$nodo[1]}";
+            $this->nodos["{$nodo[0]},{$nodo[1]}"]['distancia'] = null;
+            $this->nodos["{$nodo[0]},{$nodo[1]}"]['desde'] = null;
+
+            $pasos = $this->obtenerOpcionesPasos($nodo);
+            if (empty($pasos)) {
                 continue;
             }
-            $pasos = $this->contarPasos($camino);
-            $minimo = ( $minimo === 0 || $minimo > $pasos ? $pasos : $minimo );
+
+            foreach ($pasos as $paso) {
+                $nuevo_nodo = $this->calcularPosicionSegunSigno($nodo, $paso);
+
+                $this->nodos["{$nodo[0]},{$nodo[1]}"]['hijos']["{$nuevo_nodo[0]},{$nuevo_nodo[1]}"] = 1;
+
+                // Si el siguiente nodo es el final
+                if ($nuevo_nodo[0] == $posicion_final[0] && $nuevo_nodo[1] == $posicion_final[1]) {
+                    $this->visitas[] = $nuevo_nodo;
+
+                    $this->nodos["{$nuevo_nodo[0]},{$nuevo_nodo[1]}"] = [];
+                    $this->nodos["{$nuevo_nodo[0]},{$nuevo_nodo[1]}"]['nodo'] = "{$nuevo_nodo[0]},{$nuevo_nodo[1]}";
+                    $this->nodos["{$nuevo_nodo[0]},{$nuevo_nodo[1]}"]['distancia'] = null;
+                    $this->nodos["{$nuevo_nodo[0]},{$nuevo_nodo[1]}"]['desde'] = null;
+
+                    return true;
+                }
+
+                // Anotar para visitar
+                if (!in_array($nuevo_nodo, $this->visitas) && !in_array($nuevo_nodo, $this->cola)) {
+                    $this->cola[] = $nuevo_nodo;
+                }
+            }
         }
-        return $minimo;
+
+        return false;
     }
 
-    public function obtenerPosicionInicial($terreno)
+    public function obtenerPosicionInicial()
     {
-        $offset = strpos($terreno, PHP_EOL) + strlen(PHP_EOL);
-        $posicion = strpos($terreno, 'S');
-        return [$posicion%$offset, floor($posicion/$offset)];
+        $offset = strpos($this->terreno, PHP_EOL) + strlen(PHP_EOL);
+        $posicion = strpos($this->terreno, 'S');
+        return [intval($posicion%$offset), intval(floor($posicion/$offset))];
+    }
+
+    public function obtenerOpcionesPasos($posicion_actual)
+    {
+        $elevacion_actual = $this->obtenerElevacion($this->obtenerPosicion($posicion_actual[0], $posicion_actual[1]));
+        $retorno = [];
+        $retorno[] = $this->puedoIrDireccion($elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '^'), '^');
+        $retorno[] = $this->puedoIrDireccion($elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '!'), '!');
+        $retorno[] = $this->puedoIrDireccion($elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '<'), '<');
+        $retorno[] = $this->puedoIrDireccion($elevacion_actual, $this->calcularPosicionSegunSigno($posicion_actual, '>'), '>');
+        return array_values(array_filter($retorno));
+    }
+
+    public function obtenerElevacion(string $caracter='')
+    {
+        if ($caracter === 'S') {
+            return $this->obtenerElevacion('a');
+        }
+        if ($caracter === 'E') {
+            return $this->obtenerElevacion('z');
+        }
+        $ord = ord($caracter);
+        if ($ord>=97 && $ord<=122) {
+            return $ord - 97;
+        }
+        throw new Exception('Character non valid');
+    }
+
+    public function obtenerPosicionFinal()
+    {
+        $offset = strpos($this->terreno, PHP_EOL) + strlen(PHP_EOL);
+        $posicion = strpos($this->terreno, 'E');
+        return [intval($posicion%$offset), intval(floor($posicion/$offset))];
+    }
+
+    public function imprimirBfs()
+    {
+        $retorno = $this->terreno;
+        foreach ($this->visitas as $nodo) {
+            if (in_array($this->obtenerPosicion($retorno, $nodo[0], $nodo[1]), ['S', 'E'])) {
+                continue;
+            }
+            $retorno = $this->actualizarPosicion($retorno, $nodo[0], $nodo[1], '.');
+        }
+        echo $retorno;
+    }
+
+    public function distancia($desde, $hasta)
+    {
+        $visitados = [];
+        $cola = [];
+        $cola[] = "{$desde[0]},{$desde[1]}";
+        $this->nodos["{$desde[0]},{$desde[1]}"]['distancia'] = 0;
+
+        while (count($cola) != 0) {
+
+            // Coger nodo de menor distancia
+            $nodo = $this->cogerNodoDistanciaMinima($cola);
+
+            // Anotar como visitado
+            $visitados[] = $nodo;
+
+            // Datos del nodo $this->nodos[$nodo]
+
+            // Recorrer sus hijos para meterlos en la cola
+            if (empty($this->nodos[$nodo]['hijos'])) {
+                continue;
+            }
+            foreach ($this->nodos[$nodo]['hijos'] as $hijo=>$distancia) {
+                if (!isset($this->nodos[$hijo])) {
+                    continue;
+                }
+
+                if (!in_array($hijo, $visitados)) {
+                    $cola[] = $hijo;
+                }
+
+                if ($this->nodos[$hijo]['distancia'] == null) {
+                    $this->nodos[$hijo]['distancia'] = $this->nodos[$nodo]['distancia'] + $distancia;
+                    $this->nodos[$hijo]['desde'] = $nodo;
+                } elseif ($this->nodos[$hijo]['distancia']>$this->nodos[$nodo]['distancia'] + $distancia) {
+                    $this->nodos[$hijo]['distancia'] = $this->nodos[$nodo]['distancia'] + $distancia;
+                    $this->nodos[$hijo]['desde'] = $nodo;
+                }
+            }
+        }
+
+        return (int)$this->nodos["{$hasta[0]},{$hasta[1]}"]['distancia'];
+    }
+
+    public function cogerNodoDistanciaMinima(&$cola)
+    {
+        if (count($cola) === 1) {
+            return array_shift($cola);
+        }
+        $nodo_con_distancia_minima = null;
+        foreach ($cola as $nodo) {
+            if (!isset($this->nodos[$nodo])) {
+                continue;
+            }
+            if ($nodo_con_distancia_minima === null || $nodo_con_distancia_minima['distancia']>$this->nodos[$nodo]['distancia']) {
+                $nodo_con_distancia_minima = $this->nodos[$nodo];
+            }
+        }
+        foreach ($cola as $indice=>$nodo) {
+            if ($nodo === $nodo_con_distancia_minima['nodo']) {
+                unset($cola[$indice]);
+            }
+        }
+        $cola = array_values($cola);
+        return $nodo_con_distancia_minima['nodo'];
+    }
+
+    public function getNodos()
+    {
+        return $this->nodos;
     }
 }
